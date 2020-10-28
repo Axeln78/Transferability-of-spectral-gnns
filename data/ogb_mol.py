@@ -1,8 +1,7 @@
 import time
-import dgl
-import torch
-from torch.utils.data import Dataset
+
 from ogb.graphproppred import DglGraphPropPredDataset, Evaluator
+from torch.utils.data import Dataset
 
 
 class MOLHIVataset(Dataset):
@@ -17,6 +16,7 @@ class MOLHIVataset(Dataset):
 
         print("[I] Finished loading.")
         print("[I] Data load time: {:.4f}s".format(time.time() - start))
+
 
 class MOLPCBAataset(Dataset):
     def __init__(self, name):
