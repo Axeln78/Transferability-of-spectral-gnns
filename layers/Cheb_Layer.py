@@ -10,6 +10,7 @@ from dgl.nn.pytorch import GraphConv
     Cheb
 """
 
+
 class NodeApplyModule(nn.Module):
     """Update the node feature hv with ReLU(Whv+b)."""
 
@@ -57,7 +58,7 @@ class ChebLayer(nn.Module):
             k=self._k)
 
     def forward(self, g, feature, snorm_n, lambda_max=None):
-        h_in = feature   # to be used for residual connection
+        h_in = feature  # to be used for residual connection
 
         def unnLaplacian(feature, D_sqrt, graph):
             """ Operation D^-1/2 A D^-1/2 """

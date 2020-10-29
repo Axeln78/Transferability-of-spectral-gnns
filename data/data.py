@@ -22,10 +22,9 @@ def LoadData(DATASET_NAME):
 
     # handling for SBM datasets
     SBM_DATASETS = ['SBM_CLUSTER', 'SBM_PATTERN']
-    if DATASET_NAME in SBM_DATASETS: 
+    if DATASET_NAME in SBM_DATASETS:
         return SBMsDataset(DATASET_NAME)
 
     # handling for COLLAB dataset
     if DATASET_NAME == 'OGBL-COLLAB':
         return COLLABDataset(DATASET_NAME)
-    
