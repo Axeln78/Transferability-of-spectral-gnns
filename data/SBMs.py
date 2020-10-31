@@ -1,9 +1,9 @@
-import time
 import os
 import pickle
-import numpy as np
+import time
 
 import dgl
+import numpy as np
 import torch
 
 

@@ -1,16 +1,12 @@
-import torch
-import pickle
-import torch.utils.data
-import time
-import os
-import numpy as np
-
 import csv
+import pickle
+import time
 
 import dgl
-
-from scipy import sparse as sp
 import numpy as np
+import torch
+import torch.utils.data
+from scipy import sparse as sp
 
 
 # *NOTE

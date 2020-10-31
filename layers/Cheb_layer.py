@@ -1,10 +1,7 @@
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
-
 import dgl
 import dgl.function as fn
-from dgl.nn.pytorch import GraphConv
+import torch
+import torch.nn as nn
 
 """
     Cheb
@@ -25,7 +22,7 @@ class NodeApplyModule(nn.Module):
 
 class ChebLayer(nn.Module):
     """
-        Param: [in_dim, out_dim]
+        Param: [in_dim, out_dim, k, activation, dropout, graph_norm, batch_norm, residual connection]
     """
 
     def __init__(
@@ -45,6 +42,7 @@ class ChebLayer(nn.Module):
         self.batch_norm = batch_norm
         self.residual = residual
         self._k = k
+        self.linear = nn.Linear(k * in_dim, out_dim, bias=False)
 
         if in_dim != out_dim:
             self.residual = False
@@ -57,7 +55,7 @@ class ChebLayer(nn.Module):
             out_dim,
             k=self._k)
 
-    def forward(self, g, feature, snorm_n, lambda_max=None):
+    def forward(self, g, feature, lambda_max=None):
         h_in = feature  # to be used for residual connection
 
         def unnLaplacian(feature, D_sqrt, graph):
@@ -106,12 +104,14 @@ class ChebLayer(nn.Module):
                 X_1, X_0 = X_i, X_1
 
             # Put the Chebyschev polynomes as featuremaps
-            g.ndata['h'] = Xt
-            g.apply_nodes(func=self.apply_mod)
-            h = g.ndata.pop('h')
+            # g.ndata['h'] = Xt
+            # g.apply_nodes(func=self.apply_mod)
+            # h = g.ndata.pop('h')
+            # linear projection
+            h = self.linear(Xt)
 
-        if self.graph_norm:
-            h = h * snorm_n  # normalize activation w.r.t. graph size
+        # if self.graph_norm:
+        #    h = h * snorm_n  # normalize activation w.r.t. graph size
 
         if self.batch_norm:
             h = self.batchnorm_h(h)  # batch normalization

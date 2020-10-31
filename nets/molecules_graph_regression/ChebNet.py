@@ -36,13 +36,15 @@ class ChebNet(nn.Module):
             ChebLayer(hidden_dim, out_dim, self.k, F.relu, dropout, self.graph_norm, self.batch_norm, self.residual))
         self.MLP_layer = MLPReadout(out_dim, 1)
 
-    def forward(self, g, h, e, snorm_n, snorm_e):
+    def forward(self, g, h, e):
         h = self.embedding_h(h)
         h = self.in_feat_dropout(h)
-        lambda_max = dgl.laplacian_lambda_max(g)
+        # lambda_max = dgl.laplacian_lambda_max(g)
+
+        lambda_max = [2] * g.batch_size
 
         for conv in self.layers:
-            h = conv(g, h, snorm_n, lambda_max)
+            h = conv(g, h, lambda_max)
         g.ndata['h'] = h
 
         if self.readout == "sum":
