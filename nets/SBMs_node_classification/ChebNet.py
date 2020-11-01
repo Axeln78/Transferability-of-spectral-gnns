@@ -37,13 +37,13 @@ class ChebNet(nn.Module):
             ChebLayer(hidden_dim, out_dim, self.k, F.relu, dropout, self.graph_norm, self.batch_norm, self.residual))
         self.MLP_layer = MLPReadout(out_dim, n_classes)
 
-    def forward(self, g, h, e, snorm_n, snorm_e):
+    def forward(self, g, h, e):
         h = self.embedding_h(h)
         h = self.in_feat_dropout(h)
         lambda_max = dgl.laplacian_lambda_max(g)
         # Cheb
         for conv in self.layers:
-            h = conv(g, h, snorm_n, lambda_max)  # , lambda_max = [2]*128)
+            h = conv(g, h, lambda_max)  # , lambda_max = [2]*128)
 
         # output
         h_out = self.MLP_layer(h)
