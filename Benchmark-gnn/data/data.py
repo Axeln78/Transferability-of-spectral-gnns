@@ -23,9 +23,6 @@ def LoadData(DATASET_NAME):
     if DATASET_NAME in SBM_DATASETS:
         return SBMsDataset(DATASET_NAME)
 
-    # handling for COLLAB dataset
-    #    if DATASET_NAME == 'OGBL-COLLAB':
-    #        return COLLABDataset(DATASET_NAME)
-    # OGB
-    if DATASET_NAME == 'ogbg-molhiv' or 'ogbg-molpcba':
+    OGB_DATASETS = ['ogbg-molhiv', 'ogbg-molpcba']
+    if DATASET_NAME in OGB_DATASETS:
         return MolDataset(DATASET_NAME)

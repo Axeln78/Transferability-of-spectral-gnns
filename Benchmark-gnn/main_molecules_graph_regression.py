@@ -80,12 +80,6 @@ def train_val_pipeline(MODEL_NAME, dataset, params, net_params, dirs):
             print("[!] Adding graph self-loops for GCN/GAT models (central node trick).")
             dataset._add_self_loops()
 
-    if MODEL_NAME in ['GatedGCN']:
-        if net_params['pos_enc']:
-            print("[!] Adding graph positional encoding.")
-            dataset._add_positional_encodings(net_params['pos_enc_dim'])
-            print('Time PE:', time.time() - t0)
-
     trainset, valset, testset = dataset.train, dataset.val, dataset.test
 
     root_log_dir, root_ckpt_dir, write_file_name, write_config_file = dirs
@@ -125,30 +119,16 @@ def train_val_pipeline(MODEL_NAME, dataset, params, net_params, dirs):
     # batching exception for Diffpool
     drop_last = True if MODEL_NAME == 'DiffPool' else False
 
-    if MODEL_NAME in ['RingGNN', '3WLGNN']:
-        # import train functions specific for WLGNNs
-        from train.train_molecules_graph_regression import train_epoch_dense as train_epoch, \
-            evaluate_network_dense as evaluate_network
-        from functools import partial  # util function to pass edge_feat to collate function
+    # import train functions for all other GNNs
+    from train.train_molecules_graph_regression import train_epoch_sparse as train_epoch, \
+        evaluate_network_sparse as evaluate_network
 
-        train_loader = DataLoader(trainset, shuffle=True,
-                                  collate_fn=partial(dataset.collate_dense_gnn, edge_feat=net_params['edge_feat']))
-        val_loader = DataLoader(valset, shuffle=False,
-                                collate_fn=partial(dataset.collate_dense_gnn, edge_feat=net_params['edge_feat']))
-        test_loader = DataLoader(testset, shuffle=False,
-                                 collate_fn=partial(dataset.collate_dense_gnn, edge_feat=net_params['edge_feat']))
-
-    else:
-        # import train functions for all other GNNs
-        from train.train_molecules_graph_regression import train_epoch_sparse as train_epoch, \
-            evaluate_network_sparse as evaluate_network
-
-        train_loader = DataLoader(trainset, batch_size=params['batch_size'], shuffle=True, drop_last=drop_last,
-                                  collate_fn=dataset.collate)
-        val_loader = DataLoader(valset, batch_size=params['batch_size'], shuffle=False, drop_last=drop_last,
-                                collate_fn=dataset.collate)
-        test_loader = DataLoader(testset, batch_size=params['batch_size'], shuffle=False, drop_last=drop_last,
-                                 collate_fn=dataset.collate)
+    train_loader = DataLoader(trainset, batch_size=params['batch_size'], shuffle=True, drop_last=drop_last,
+                              collate_fn=dataset.collate)
+    val_loader = DataLoader(valset, batch_size=params['batch_size'], shuffle=False, drop_last=drop_last,
+                            collate_fn=dataset.collate)
+    test_loader = DataLoader(testset, batch_size=params['batch_size'], shuffle=False, drop_last=drop_last,
+                             collate_fn=dataset.collate)
 
     # At any point you can hit Ctrl + C to break out of training early.
     try:
@@ -159,12 +139,8 @@ def train_val_pipeline(MODEL_NAME, dataset, params, net_params, dirs):
 
                 start = time.time()
 
-                if MODEL_NAME in ['RingGNN', '3WLGNN']:  # since different batch training function for RingGNN
-                    epoch_train_loss, epoch_train_mae, optimizer = train_epoch(model, optimizer, device, train_loader,
-                                                                               epoch, params['batch_size'])
-                else:  # for all other models common train function
-                    epoch_train_loss, epoch_train_mae, optimizer = train_epoch(model, optimizer, device, train_loader,
-                                                                               epoch)
+                epoch_train_loss, epoch_train_mae, optimizer = train_epoch(model, optimizer, device, train_loader,
+                                                                           epoch)
 
                 epoch_val_loss, epoch_val_mae = evaluate_network(model, device, val_loader, epoch)
                 _, epoch_test_mae = evaluate_network(model, device, test_loader, epoch)
@@ -385,17 +361,6 @@ def main():
     # ZINC
     net_params['num_atom_type'] = dataset.num_atom_type
     net_params['num_bond_type'] = dataset.num_bond_type
-
-    if MODEL_NAME == 'DiffPool':
-        # calculate assignment dimension: pool_ratio * largest graph's maximum
-        # number of nodes  in the dataset
-        num_nodes = [dataset.train[i][0].number_of_nodes() for i in range(len(dataset.train))]
-        max_num_node = max(num_nodes)
-        net_params['assign_dim'] = int(max_num_node * net_params['pool_ratio']) * net_params['batch_size']
-
-    if MODEL_NAME == 'RingGNN':
-        num_nodes = [dataset.train[i][0].number_of_nodes() for i in range(len(dataset.train))]
-        net_params['avg_node_num'] = int(np.ceil(np.mean(num_nodes)))
 
     root_log_dir = out_dir + 'logs/' + MODEL_NAME + "_" + DATASET_NAME + "_GPU" + str(
         config['gpu']['id']) + "_" + time.strftime('%Hh%Mm%Ss_on_%b_%d_%Y')
