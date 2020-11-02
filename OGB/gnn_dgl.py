@@ -82,7 +82,7 @@ class GNN(nn.Module):
         gnn_layer = {
             'Cheb_net': ChebLayer,
             'mlp': MLPLayer,
-        }.get(gnn_type, GatedGCNLayer)
+        }.get(gnn_type, ChebLayer)
 
         self.layers = nn.ModuleList([
             gnn_layer(emb_dim, emb_dim, dropout=dropout, batch_norm=batch_norm, residual=residual)
@@ -130,10 +130,7 @@ class ChebLayer(nn.Module):
         self.batchnorm_h = nn.BatchNorm1d(self.out_channels)
         self.activation = F.relu
         self.dropout = nn.Dropout(dropout)
-        self.apply_mod = NodeApplyModule(
-            self.in_channels,
-            self.out_channels,
-            k=self._k)
+
         self.linear = nn.Linear(self._k * self.in_channels, self.out_channels, bias=False)
 
     # def forward(self, g, feature, snorm_n, lambda_max=None):

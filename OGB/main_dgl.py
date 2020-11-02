@@ -8,7 +8,7 @@ from ogb.graphproppred import DglGraphPropPredDataset, Evaluator
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
-from OGB.gnn_dgl import GNN
+from gnn_dgl import GNN
 
 cls_criterion = torch.nn.BCEWithLogitsLoss()
 reg_criterion = torch.nn.MSELoss()
