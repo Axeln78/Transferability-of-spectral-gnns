@@ -10,6 +10,7 @@
 ############
 
 DIR=molecules/
+mkdir -p $DIR
 cd $DIR
 
 FILE=ZINC.pkl
@@ -36,6 +37,7 @@ cd ..
 ############
 
 DIR=SBMs/
+mkdir -p $DIR
 cd $DIR
 
 FILE=SBM_CLUSTER.pkl
