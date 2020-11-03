@@ -344,13 +344,12 @@ def main():
     net_params['num_bond_type'] = dataset.num_bond_type
 
     root_log_dir = out_dir + 'logs/' + MODEL_NAME + "_" + DATASET_NAME + "_GPU" + str(
-        config['gpu']['id']) + "_" + time.strftime('%Hh%Mm%Ss_on_%b_%d_%Y')
+        config['gpu']['id'])+ "_" + params['seed'] + "_" + time.strftime('%Hh%Mm%Ss_on_%b_%d_%Y')
     root_ckpt_dir = out_dir + 'checkpoints/' + MODEL_NAME + "_" + DATASET_NAME + "_GPU" + str(
-        config['gpu']['id']) + "_" + time.strftime('%Hh%Mm%Ss_on_%b_%d_%Y')
+        config['gpu']['id'])+ "_" + params['seed'] + "_" + time.strftime('%Hh%Mm%Ss_on_%b_%d_%Y')
     write_file_name = out_dir + 'results/result_' + MODEL_NAME + "_" + DATASET_NAME + "_GPU" + str(
-        config['gpu']['id']) + "_" + time.strftime('%Hh%Mm%Ss_on_%b_%d_%Y')
-    write_config_file = out_dir + 'configs/config_' + MODEL_NAME + "_" + DATASET_NAME + "_GPU" + str(
-        config['gpu']['id']) + "_" + time.strftime('%Hh%Mm%Ss_on_%b_%d_%Y')
+        config['gpu']['id'])+ "_" + params['seed'] + "_" + time.strftime('%Hh%Mm%Ss_on_%b_%d_%Y')
+    write_config_file = out_dir + 'configs/config_' + MODEL_NAME + "_" + DATASET_NAME + "_GPU" + str(config['gpu']['id'])+ "_" + params['seed'] + "_" + time.strftime('%Hh%Mm%Ss_on_%b_%d_%Y')
     dirs = root_log_dir, root_ckpt_dir, write_file_name, write_config_file
 
     if not os.path.exists(out_dir + 'results'):
