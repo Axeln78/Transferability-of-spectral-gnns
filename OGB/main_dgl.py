@@ -1,5 +1,5 @@
 import argparse
-
+import os
 import dgl
 import numpy as np
 import torch
@@ -7,6 +7,7 @@ import torch.optim as optim
 from gnn_dgl import GNN
 from ogb.graphproppred import DglGraphPropPredDataset, Evaluator
 from torch.utils.data import DataLoader
+from tensorboardX import SummaryWriter
 from tqdm import tqdm
 
 cls_criterion = torch.nn.BCEWithLogitsLoss()
@@ -101,6 +102,10 @@ def main():
     ### automatic dataloading and splitting
     dataset = DglGraphPropPredDataset(name=args.dataset)
 
+    if not os.path.exists('results'):
+        os.makedirs('results')
+    writer = SummaryWriter(log_dir='results/' + args.filename + 'logs/' + args.dataset + '/' + args.gnn)
+
     split_idx = dataset.get_idx_split()
 
     ### automatic evaluator. takes dataset name as input
@@ -154,6 +159,10 @@ def main():
         valid_curve.append(valid_perf[dataset.eval_metric])
         test_curve.append(test_perf[dataset.eval_metric])
 
+        writer.add_scalar('Val', valid_perf[dataset.eval_metric], epoch)
+        writer.add_scalar('Test', test_perf[dataset.eval_metric], epoch)
+        writer.add_scalar('Train', train_perf[dataset.eval_metric], epoch)
+
     if 'classification' in dataset.task_type:
         best_val_epoch = np.argmax(np.array(valid_curve))
         best_train = max(train_curve)
@@ -172,6 +181,12 @@ def main():
             'Train': train_curve[best_val_epoch],
             'BestTrain': best_train
         }, args.filename)
+
+    writer.add_scalar('Best Val', valid_curve[best_val_epoch], best_val_epoch)
+    writer.add_scalar('Best Test', test_curve[best_val_epoch], best_val_epoch)
+    writer.add_scalar('Best Train', train_curve[best_val_epoch], best_val_epoch)
+    writer.add_scalar('BestTrain', best_train)
+    writer.close()
 
 
 if __name__ == "__main__":
