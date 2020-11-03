@@ -1,13 +1,11 @@
-import time
 import os
 import pickle
-import numpy as np
+import time
 
 import dgl
-import torch
-
-from scipy import sparse as sp
 import numpy as np
+import torch
+from scipy import sparse as sp
 
 
 class load_SBMsDataSetDGL(torch.utils.data.Dataset):

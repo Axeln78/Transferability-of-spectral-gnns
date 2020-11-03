@@ -27,7 +27,7 @@ class DotDict(dict):
     IMPORTING CUSTOM MODULES/METHODS
 """
 
-from nets.SBMs_node_classification.load_net import gnn_model  # import GNNs
+from nets.SBMs_node_classification.ChebNet import ChebNet  # import GNNs
 from data.data import LoadData  # import dataset
 
 """
@@ -54,7 +54,7 @@ def gpu_setup(use_gpu, gpu_id):
 
 
 def view_model_param(MODEL_NAME, net_params):
-    model = gnn_model(MODEL_NAME, net_params)
+    model = ChebNet(net_params)
     total_param = 0
     print("MODEL DETAILS:\n")
     # print(model)
@@ -75,17 +75,6 @@ def train_val_pipeline(MODEL_NAME, dataset, params, net_params, dirs):
     per_epoch_time = []
 
     DATASET_NAME = dataset.name
-
-    if MODEL_NAME in ['GCN', 'GAT']:
-        if net_params['self_loop']:
-            print("[!] Adding graph self-loops for GCN/GAT models (central node trick).")
-            dataset._add_self_loops()
-
-    if MODEL_NAME in ['GatedGCN']:
-        if net_params['pos_enc']:
-            print("[!] Adding graph positional encoding.")
-            dataset._add_positional_encodings(net_params['pos_enc_dim'])
-            print('Time PE:', time.time() - start0)
 
     trainset, valset, testset = dataset.train, dataset.val, dataset.test
 
@@ -112,7 +101,7 @@ def train_val_pipeline(MODEL_NAME, dataset, params, net_params, dirs):
     print("Test Graphs: ", len(testset))
     print("Number of Classes: ", net_params['n_classes'])
 
-    model = gnn_model(MODEL_NAME, net_params)
+    model = ChebNet(net_params)
     model = model.to(device)
 
     optimizer = optim.Adam(model.parameters(), lr=params['init_lr'], weight_decay=params['weight_decay'])
@@ -124,23 +113,13 @@ def train_val_pipeline(MODEL_NAME, dataset, params, net_params, dirs):
     epoch_train_losses, epoch_val_losses = [], []
     epoch_train_accs, epoch_val_accs = [], []
 
-    if MODEL_NAME in ['RingGNN', '3WLGNN']:
-        # import train functions specific for WL-GNNs
-        from train.train_SBMs_node_classification import train_epoch_dense as train_epoch, \
-            evaluate_network_dense as evaluate_network
+    # import train functions for all other GCNs
+    from train.train_SBMs_node_classification import train_epoch_sparse as train_epoch, \
+        evaluate_network_sparse as evaluate_network
 
-        train_loader = DataLoader(trainset, shuffle=True, collate_fn=dataset.collate_dense_gnn)
-        val_loader = DataLoader(valset, shuffle=False, collate_fn=dataset.collate_dense_gnn)
-        test_loader = DataLoader(testset, shuffle=False, collate_fn=dataset.collate_dense_gnn)
-
-    else:
-        # import train functions for all other GCNs
-        from train.train_SBMs_node_classification import train_epoch_sparse as train_epoch, \
-            evaluate_network_sparse as evaluate_network
-
-        train_loader = DataLoader(trainset, batch_size=params['batch_size'], shuffle=True, collate_fn=dataset.collate)
-        val_loader = DataLoader(valset, batch_size=params['batch_size'], shuffle=False, collate_fn=dataset.collate)
-        test_loader = DataLoader(testset, batch_size=params['batch_size'], shuffle=False, collate_fn=dataset.collate)
+    train_loader = DataLoader(trainset, batch_size=params['batch_size'], shuffle=True, collate_fn=dataset.collate)
+    val_loader = DataLoader(valset, batch_size=params['batch_size'], shuffle=False, collate_fn=dataset.collate)
+    test_loader = DataLoader(testset, batch_size=params['batch_size'], shuffle=False, collate_fn=dataset.collate)
 
     # At any point you can hit Ctrl + C to break out of training early.
     try:
@@ -151,12 +130,8 @@ def train_val_pipeline(MODEL_NAME, dataset, params, net_params, dirs):
 
                 start = time.time()
 
-                if MODEL_NAME in ['RingGNN', '3WLGNN']:  # since different batch training function for dense GNNs
-                    epoch_train_loss, epoch_train_acc, optimizer = train_epoch(model, optimizer, device, train_loader,
-                                                                               epoch, params['batch_size'])
-                else:  # for all other models common train function
-                    epoch_train_loss, epoch_train_acc, optimizer = train_epoch(model, optimizer, device, train_loader,
-                                                                               epoch)
+                epoch_train_loss, epoch_train_acc, optimizer = train_epoch(model, optimizer, device, train_loader,
+                                                                           epoch)
 
                 epoch_val_loss, epoch_val_acc = evaluate_network(model, device, val_loader, epoch)
                 _, epoch_test_acc = evaluate_network(model, device, test_loader, epoch)
@@ -361,12 +336,6 @@ def main():
         net_params['gnn_per_block'] = int(args.gnn_per_block)
     if args.embedding_dim is not None:
         net_params['embedding_dim'] = int(args.embedding_dim)
-    if args.pool_ratio is not None:
-        net_params['pool_ratio'] = float(args.pool_ratio)
-    if args.linkpred is not None:
-        net_params['linkpred'] = True if args.linkpred == 'True' else False
-    if args.cat is not None:
-        net_params['cat'] = True if args.cat == 'True' else False
     if args.self_loop is not None:
         net_params['self_loop'] = True if args.self_loop == 'True' else False
     if args.pos_enc is not None:
@@ -378,10 +347,6 @@ def main():
     net_params['in_dim'] = torch.unique(dataset.train[0][0].ndata['feat'], dim=0).size(
         0)  # node_dim (feat is an integer)
     net_params['n_classes'] = torch.unique(dataset.train[0][1], dim=0).size(0)
-
-    if MODEL_NAME == 'RingGNN':
-        num_nodes = [dataset.train[i][0].number_of_nodes() for i in range(len(dataset.train))]
-        net_params['avg_node_num'] = int(np.ceil(np.mean(num_nodes)))
 
     root_log_dir = out_dir + 'logs/' + MODEL_NAME + "_" + DATASET_NAME + "_GPU" + str(
         config['gpu']['id']) + "_" + time.strftime('%Hh%Mm%Ss_on_%b_%d_%Y')

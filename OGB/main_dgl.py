@@ -4,11 +4,10 @@ import dgl
 import numpy as np
 import torch
 import torch.optim as optim
+from gnn_dgl import GNN
 from ogb.graphproppred import DglGraphPropPredDataset, Evaluator
 from torch.utils.data import DataLoader
 from tqdm import tqdm
-
-from gnn_dgl import GNN
 
 cls_criterion = torch.nn.BCEWithLogitsLoss()
 reg_criterion = torch.nn.MSELoss()

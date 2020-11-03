@@ -26,7 +26,7 @@ class DotDict(dict):
 """
     IMPORTING CUSTOM MODULES/METHODS
 """
-from nets.molecules_graph_regression.load_net import gnn_model  # import all GNNS
+from nets.molecules_graph_regression.ChebNet import ChebNet  # import the ChebNet GNN
 from data.data import LoadData  # import dataset
 
 """
@@ -53,7 +53,7 @@ def gpu_setup(use_gpu, gpu_id):
 
 
 def view_model_param(MODEL_NAME, net_params):
-    model = gnn_model(MODEL_NAME, net_params)
+    model = ChebNet(net_params)
     total_param = 0
     print("MODEL DETAILS:\n")
     # print(model)
@@ -74,11 +74,6 @@ def train_val_pipeline(MODEL_NAME, dataset, params, net_params, dirs):
     per_epoch_time = []
 
     DATASET_NAME = dataset.name
-
-    if MODEL_NAME in ['GCN', 'GAT']:
-        if net_params['self_loop']:
-            print("[!] Adding graph self-loops for GCN/GAT models (central node trick).")
-            dataset._add_self_loops()
 
     trainset, valset, testset = dataset.train, dataset.val, dataset.test
 
@@ -104,7 +99,7 @@ def train_val_pipeline(MODEL_NAME, dataset, params, net_params, dirs):
     print("Validation Graphs: ", len(valset))
     print("Test Graphs: ", len(testset))
 
-    model = gnn_model(MODEL_NAME, net_params)
+    model = ChebNet(net_params)
     model = model.to(device)
 
     optimizer = optim.Adam(model.parameters(), lr=params['init_lr'], weight_decay=params['weight_decay'])
@@ -335,28 +330,14 @@ def main():
         net_params['layer_norm'] = True if args.layer_norm == 'True' else False
     if args.batch_norm is not None:
         net_params['batch_norm'] = True if args.batch_norm == 'True' else False
-    if args.sage_aggregator is not None:
-        net_params['sage_aggregator'] = args.sage_aggregator
     if args.data_mode is not None:
         net_params['data_mode'] = args.data_mode
     if args.num_pool is not None:
         net_params['num_pool'] = int(args.num_pool)
-    if args.gnn_per_block is not None:
-        net_params['gnn_per_block'] = int(args.gnn_per_block)
     if args.embedding_dim is not None:
         net_params['embedding_dim'] = int(args.embedding_dim)
-    if args.pool_ratio is not None:
-        net_params['pool_ratio'] = float(args.pool_ratio)
-    if args.linkpred is not None:
-        net_params['linkpred'] = True if args.linkpred == 'True' else False
-    if args.cat is not None:
-        net_params['cat'] = True if args.cat == 'True' else False
     if args.self_loop is not None:
         net_params['self_loop'] = True if args.self_loop == 'True' else False
-    if args.pos_enc is not None:
-        net_params['pos_enc'] = True if args.pos_enc == 'True' else False
-    if args.pos_enc_dim is not None:
-        net_params['pos_enc_dim'] = int(args.pos_enc_dim)
 
     # ZINC
     net_params['num_atom_type'] = dataset.num_atom_type

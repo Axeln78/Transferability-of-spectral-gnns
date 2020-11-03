@@ -6,10 +6,6 @@ import torch
 
 from train.metrics import accuracy_SBM as accuracy
 
-"""
-    For GCNs
-"""
-
 
 def train_epoch_sparse(model, optimizer, device, data_loader, epoch):
     model.train()

@@ -7,19 +7,6 @@ import torch.nn as nn
     Cheb
 """
 
-
-class NodeApplyModule(nn.Module):
-    """Update the node feature hv with ReLU(Whv+b)."""
-
-    def __init__(self, in_feats, out_feats, k):
-        super(NodeApplyModule, self).__init__()
-        self.linear = nn.Linear(k * in_feats, out_feats)
-
-    def forward(self, node):
-        h = self.linear(node.data['h'])
-        return {'h': h}
-
-
 class ChebLayer(nn.Module):
     """
         Param: [in_dim, out_dim, k, activation, dropout, graph_norm, batch_norm, residual connection]
@@ -50,10 +37,6 @@ class ChebLayer(nn.Module):
         self.batchnorm_h = nn.BatchNorm1d(out_dim)
         self.activation = activation
         self.dropout = nn.Dropout(dropout)
-        self.apply_mod = NodeApplyModule(
-            in_dim,
-            out_dim,
-            k=self._k)
 
     def forward(self, g, feature, lambda_max=None):
         h_in = feature  # to be used for residual connection
@@ -104,10 +87,6 @@ class ChebLayer(nn.Module):
                 X_1, X_0 = X_i, X_1
 
             # Put the Chebyschev polynomes as featuremaps
-            # g.ndata['h'] = Xt
-            # g.apply_nodes(func=self.apply_mod)
-            # h = g.ndata.pop('h')
-            # linear projection
             h = self.linear(Xt)
 
         # if self.graph_norm:
