@@ -29,7 +29,7 @@ class ChebLayer(nn.Module):
         self.batch_norm = batch_norm
         self.residual = residual
         self._k = k
-        self.linear = nn.Linear(k * in_dim, out_dim, bias=False)
+        self.linear = nn.Linear(k * in_dim, out_dim)
 
         if in_dim != out_dim:
             self.residual = False
