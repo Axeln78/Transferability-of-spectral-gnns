@@ -19,10 +19,10 @@
     "max_time": 48
   },
   "net_params": {
-    "L": 3,
-    "hidden_dim": 128,
-    "out_dim": 128,
-    "residual": true,
+    "L": 4,
+    "hidden_dim": 106,
+    "out_dim": 106,
+    "residual": false,
     "readout": "mean",
     "k": 2,
     "in_feat_dropout": 0.0,
