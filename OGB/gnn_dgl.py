@@ -131,7 +131,7 @@ class ChebLayer(nn.Module):
         self.activation = F.relu
         self.dropout = nn.Dropout(dropout)
 
-        self.linear = nn.Linear(self._k * self.in_channels, self.out_channels, bias=False)
+        self.linear = nn.Linear(self._k * self.in_channels, self.out_channels, bias=True)
 
     # def forward(self, g, feature, snorm_n, lambda_max=None):
     def forward(self, g, feature, e):

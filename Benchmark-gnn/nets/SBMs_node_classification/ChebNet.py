@@ -40,7 +40,8 @@ class ChebNet(nn.Module):
     def forward(self, g, h, e):
         h = self.embedding_h(h)
         h = self.in_feat_dropout(h)
-        lambda_max = dgl.laplacian_lambda_max(g)
+        #lambda_max = dgl.laplacian_lambda_max(g)
+        lambda_max = [2] * g.batch_size
         # Cheb
         for conv in self.layers:
             h = conv(g, h, lambda_max)  # , lambda_max = [2]*128)
