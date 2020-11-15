@@ -4,8 +4,8 @@
     "id": 0
   },
   "model": "ChebNet",
-  "dataset": "ZINC",
-  "out_dir": "out/molecules_graph_regression/",
+  "dataset": "SBM_PATTERN",
+  "out_dir": "out/SBMs_node_classification/PATTERN_no_rsd/",
   "params": {
     "seed": 41,
     "epochs": 1000,
@@ -20,11 +20,11 @@
   },
   "net_params": {
     "L": 4,
-    "hidden_dim": 106,
-    "out_dim": 106,
-    "residual": true,
+    "hidden_dim": 70,
+    "out_dim": 70,
+    "residual": false,
+    "k": 5,
     "readout": "mean",
-    "k": 2,
     "in_feat_dropout": 0.0,
     "dropout": 0.0,
     "graph_norm": true,
