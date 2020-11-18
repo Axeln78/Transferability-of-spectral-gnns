@@ -5,7 +5,7 @@ import numpy as np
 import torch
 import torch.optim as optim
 from gnn_dgl import GNN
-from ogb.graphproppred import DglGraphPropPredDataset, Evaluator
+from ogb.graphproppred import DglGraphPropPredDataset, Evaluator, collate_dgl
 from torch.utils.data import DataLoader
 from tensorboardX import SummaryWriter
 from tqdm import tqdm
@@ -21,8 +21,7 @@ def train(model, device, loader, optimizer, task_type):
         batch_graphs = batch_graphs.to(device)
         batch_labels = batch_labels.to(device)
         batch_h = batch_graphs.ndata['feat'].to(device)
-        batch_e = batch_graphs.edata['feat'].to(device)
-
+        batch_e = batch_graphs.edata['feat'].to(device) 
         pred = model(batch_graphs, batch_h, batch_e)
 
         optimizer.zero_grad()
@@ -63,20 +62,13 @@ def eval(model, device, loader, evaluator):
     return evaluator.eval(input_dict)
 
 
-def collate_dgl(samples):
-    graphs, labels = map(list, zip(*samples))
-    batched_graph = dgl.batch(graphs)
-    labels = torch.stack(labels)
-    return batched_graph, labels
-
-
 def main():
     # Training settings
     parser = argparse.ArgumentParser(description='GNN baselines on ogbgmol* data with DGL')
     parser.add_argument('--device', type=int, default=0,
                         help='which gpu to use if any (default: 0)')
-    parser.add_argument('--gnn', type=str, default='gated-gcn',
-                        help='GNN (default: gated-gcn)')
+    parser.add_argument('--gnn', type=str, default='Cheb_net',
+                        help='GNN (default: Cheb_net)')
     parser.add_argument('--dropout', type=float, default=0.5,
                         help='dropout ratio (default: 0.5)')
     parser.add_argument('--num_layer', type=int, default=5,
@@ -112,19 +104,14 @@ def main():
     evaluator = Evaluator(args.dataset)
 
     train_loader = DataLoader(dataset[split_idx["train"]], batch_size=args.batch_size, shuffle=True,
-                              num_workers=args.num_workers, collate_fn=collate_dgl)
+                              num_workers=args.num_workers, collate_fn=collate_dgl, pin_memory = True)
     valid_loader = DataLoader(dataset[split_idx["valid"]], batch_size=args.batch_size, shuffle=False,
-                              num_workers=args.num_workers, collate_fn=collate_dgl)
+                              num_workers=args.num_workers, collate_fn=collate_dgl, pin_memory = True)
     test_loader = DataLoader(dataset[split_idx["test"]], batch_size=args.batch_size, shuffle=False,
-                             num_workers=args.num_workers, collate_fn=collate_dgl)
+                             num_workers=args.num_workers, collate_fn=collate_dgl, pin_memory = True)
 
-    if args.gnn in ['gated-gcn', 'mlp']:
+    if args.gnn in ['gated-gcn', 'mlp', 'Cheb_net']:
         model = GNN(gnn_type=args.gnn, num_tasks=dataset.num_tasks, num_layer=args.num_layer,
-                    emb_dim=args.emb_dim, dropout=args.dropout, batch_norm=True,
-                    residual=True, graph_pooling="mean")
-        model.to(device)
-    elif args.gnn == 'Cheb_net':
-        model = GNN(gnn_type='Cheb_net', num_tasks=dataset.num_tasks, num_layer=args.num_layer,
                     emb_dim=args.emb_dim, dropout=args.dropout, batch_norm=True,
                     residual=True, graph_pooling="mean")
         model.to(device)

@@ -148,6 +148,8 @@ class ChebLayer(nn.Module):
             D_sqrt = torch.pow(g.in_degrees().float().clamp(
                 min=1), -0.5).unsqueeze(-1).to(feature.device)
 
+            lambda_max = [2] * g.batch_size
+            
             if lambda_max is None:
                 try:
                     lambda_max = dgl.laplacian_lambda_max(g)
