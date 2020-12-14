@@ -14,8 +14,6 @@ The code used for [OGB](https://github.com/snap-stanford/ogb) is straightforward
 
 ## To reproduce the results:
 
-In order to launch all of the simulations, use the command `shell main_exec.sh`
-
 Setup your environment:
 
     conda env create -f environment_gpu.yml
