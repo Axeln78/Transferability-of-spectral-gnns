@@ -4,7 +4,7 @@
 This repository holds the corresponding code to the paper ´An Experimental Study of the Transferability of Spectral Graph Networks´. The focus of the work is to study the performance of the ChebNet, a spectral graph neural network, with regards to other spacial methods on datasets made out of sets of graphs.
 The datasets are all from the open benchmarks OGB and benchmarking-gnns. The figure below shows the summary of the chosen tasks.
 
-![](img_tasks.png)
+![](images/img_tasks.png)
 
 ### Benchmarking gnns
 Most of the structure of the code are simplifications made on the [benchmarking-gnns](https://github.com/graphdeeplearning/benchmarking-gnns) code base 
@@ -56,4 +56,4 @@ Setup your environment:
     
   ## Results
   The results as can be found in the paper:
-  ![](img_table.png)
+  ![](images/img_table.png)
