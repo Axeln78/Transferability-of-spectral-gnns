@@ -1,27 +1,41 @@
 # Paper Material
 ### Experiments for the paper ´An Experimental Study of the Transferability of Spectral Graph Networks´
 
-Most of the structure of the code are simplifications made on the benchmarking-gnns code base that can be found at this LINK
+This repository holds the corresponding code to the paper ´An Experimental Study of the Transferability of Spectral Graph Networks´. The focus of the work is to study the performance of the ChebNet, a spectral graph neural network, with regards to other spacial methods on datasets made out of sets of graphs.
+The datasets are all from the open benchmarks OGB and benchmarking-gnns. The figure below shows the summary of the chosen tasks.
 
-## Reproducibility
+![](img_tasks.png)
+
+### Benchmarking gnns
+Most of the structure of the code are simplifications made on the [benchmarking-gnns](https://github.com/graphdeeplearning/benchmarking-gnns) code base 
+
+### Open Graph Benchmark (OGB)
+The code used for [OGB](https://github.com/snap-stanford/ogb) is straightforward with small changes to the original [example notebooks](https://github.com/snap-stanford/ogb/tree/master/examples/graphproppred/code). We use the DGL framework to make sure to use the same model as for the benchmarking gnns experiments.
+
+## To reproduce the results:
 
 In order to launch all of the simulations, use the command `shell main_exec.sh`
 
-Add docker environment?
 Setup your environment:
 
     conda env create -f environment_gpu.yml
 
-OGB:
+#### OGB:
+- In order to run a model on a given dataset `$DATASET` with an output file `$FILENAME` run the following command:
 
-    python main_dgl.py --dataset $DATASET --gnn Cheb_net --filename $FILENAME
-    
-Benchmarking_gnns:
-- First you will need to download the datasets
+        python main_dgl.py --dataset $DATASET --gnn Cheb_net --filename $FILENAME
 
-    cd Benchmark-gnn/data
-    bash script_download_all_datasets.sh
+- Otherwise make sure to make a script that matches your config by tweaking on the script `script_ogb.sh`.
     
+#### Benchmarking_gnns:
+- In order to make run the benchmarking gnn datasets you should first download them by using the following commands:
+
+        cd Benchmark-gnn/data/
+        bash script_download_all_datasets.sh
+    
+- Then you can run the experiments by using the command:
+
+        bash benchmark_gnn_script.sh
     
 ## Repository structure
     .
@@ -41,3 +55,7 @@ Benchmarking_gnns:
     ├── environment files        # Yml files used to set up the environment
     ├── LICENSE
     └── README.md
+    
+  ## Results
+  The results as can be found in the paper:
+  ![](img_table.png)
