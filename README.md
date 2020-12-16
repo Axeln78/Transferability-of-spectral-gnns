@@ -1,7 +1,8 @@
-# Paper Material
-### Experiments for the paper ´An Experimental Study of the Transferability of Spectral Graph Networks´
+# An Experimental Study of the Transferability of Spectral Graph Networks
 
-This repository holds the corresponding code to the paper ´An Experimental Study of the Transferability of Spectral Graph Networks´. The focus of the work is to study the performance of the ChebNet, a spectral graph neural network, with regards to other spacial methods on datasets made out of sets of graphs.
+This repository holds the corresponding code to the paper ´An Experimental Study of the Transferability of Spectral Graph Networks´ by Axel Nilsson and Xavier Bresson. 
+
+The focus of the work is to study the performance of the ChebNet, a spectral graph neural network, with regards to other spacial methods on datasets made out of sets of graphs.
 The datasets are all from the open benchmarks OGB and benchmarking-gnns. The figure below shows the summary of the chosen tasks.
 
 ![](images/img_tasks.png)
@@ -57,3 +58,7 @@ Setup your environment:
   ## Results
   The results as can be found in the paper:
   ![](images/img_table.png)
+
+  ## Reference
+  
+  Link To be added in Feb 2021
