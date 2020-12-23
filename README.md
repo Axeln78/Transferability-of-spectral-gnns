@@ -61,4 +61,11 @@ Setup your environment:
 
   ## Reference
   
-  Link To be added in Feb 2021
+    @misc{nilsson2020experimental,
+          title={An Experimental Study of the Transferability of Spectral Graph Networks}, 
+          author={Axel Nilsson and Xavier Bresson},
+          year={2020},
+          eprint={2012.10258},
+          archivePrefix={arXiv},
+          primaryClass={cs.LG}
+    }
