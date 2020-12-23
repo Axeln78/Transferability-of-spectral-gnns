@@ -60,6 +60,7 @@ Setup your environment:
   ![](images/img_table.png)
 
   ## Reference
+  [arXiv's paper](https://arxiv.org/abs/2012.10258)
   
     @misc{nilsson2020experimental,
           title={An Experimental Study of the Transferability of Spectral Graph Networks}, 
